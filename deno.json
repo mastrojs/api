@@ -12,7 +12,7 @@
     "./client": "./src/client.ts"
   },
   "imports": {
-    "@mastrojs/mastro": "jsr:@mastrojs/mastro@0",
-    "@mastrojs/result": "jsr:@mastrojs/result@0"
+    "@mastrojs/mastro": "jsr:@mastrojs/mastro@^0.8.7",
+    "@mastrojs/result": "jsr:@mastrojs/result@^0.1.2"
   }
 }

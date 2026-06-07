@@ -50,44 +50,43 @@ export const jsonRoute = <
   handler: (
     context: { body: B; params: P; query: Q; req: Request },
   ) => Result<R> | Promise<Result<R>>,
-): JsonRoute<B, M, P, Q, R, U> =>
-  (
-    async (req) => {
-      const url = new URL(req.url);
-      const params = getParams(req);
+): { [method in M]: JsonRoute<B, M, P, Q, R, U> } => ({
+  [opts.method]: async (req: Request) => {
+    const url = new URL(req.url);
+    const params = getParams(req);
 
-      const paramsRes = await opts.params?.["~standard"].validate(params);
-      if (paramsRes?.issues) {
-        return response(Err("URL path failed to validate", 401, undefined, paramsRes));
-      }
-
-      const query = Object.fromEntries(url.searchParams);
-      const queryRes = await opts.query?.["~standard"].validate(query);
-      if (queryRes?.issues) {
-        return response(Err(`queryParams failed to validate`, 401, undefined, queryRes));
-      }
-
-      let body;
-      if (opts.body) {
-        let data: unknown;
-        try {
-          data = await req.json();
-        } catch (e) {
-          return response(Err(e instanceof Error ? e.message : "invalid JSON", 400));
-        }
-        const result = await opts.body["~standard"].validate(data);
-        if (result.issues) {
-          return response(Err("Body failed to validate", 400, undefined, result));
-        } else {
-          body = result.value;
-        }
-      }
-
-      const res = await handler({ body, params, query, req } as any);
-
-      return response(res);
+    const paramsRes = await opts.params?.["~standard"].validate(params);
+    if (paramsRes?.issues) {
+      return response(Err("URL path failed to validate", 401, undefined, paramsRes));
     }
-  ) as JsonRoute<B, M, P, Q, R, U>;
+
+    const query = Object.fromEntries(url.searchParams);
+    const queryRes = await opts.query?.["~standard"].validate(query);
+    if (queryRes?.issues) {
+      return response(Err(`queryParams failed to validate`, 401, undefined, queryRes));
+    }
+
+    let body;
+    if (opts.body) {
+      let data: unknown;
+      try {
+        data = await req.json();
+      } catch (e) {
+        return response(Err(e instanceof Error ? e.message : "invalid JSON", 400));
+      }
+      const result = await opts.body["~standard"].validate(data);
+      if (result.issues) {
+        return response(Err("Body failed to validate", 400, undefined, result));
+      } else {
+        body = result.value;
+      }
+    }
+
+    const res = await handler({ body, params, query, req } as any);
+
+    return response(res);
+  },
+} as { [method in M]: JsonRoute<B, M, P, Q, R, U> });
 
 /**
  * This is the standard `(req: Request) => Response` type, along with a few phantom types
