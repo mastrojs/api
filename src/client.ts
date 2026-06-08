@@ -1,3 +1,8 @@
+/**
+ * `@mastrojs/api/client` contains functions for the client of the API.
+ * @module
+ */
+
 // deno-lint-ignore-file no-explicit-any
 import { Err, Ok, type Result } from "@mastrojs/result";
 import type { JsonRoute } from "./server.ts";
@@ -8,6 +13,9 @@ export type Method = "DELETE" | "GET" | "HEAD" | "OPTIONS" | "PATCH" | "POST" | 
 /** Fetch options with timeout */
 export type RequestOpts = RequestInit & { timeout?: number };
 
+/**
+ * String that will be in `res.error` in case of a fetch timeout.
+ */
 export const timeoutError = "timeoutError";
 
 /**

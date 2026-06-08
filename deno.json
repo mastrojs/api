@@ -1,9 +1,6 @@
 {
   "name": "@mastrojs/api",
-  "version": "0.0.1",
-  "tasks": {
-    "publish": "deno test && deno publish"
-  },
+  "version": "0.1.0",
   "fmt": {
     "lineWidth": 100
   },
@@ -12,7 +9,7 @@
     "./client": "./src/client.ts"
   },
   "imports": {
-    "@mastrojs/mastro": "jsr:@mastrojs/mastro@^0.8.7",
-    "@mastrojs/result": "jsr:@mastrojs/result@^0.1.2"
+    "@mastrojs/mastro": "jsr:@mastrojs/mastro@^0",
+    "@mastrojs/result": "jsr:@mastrojs/result@^0"
   }
 }

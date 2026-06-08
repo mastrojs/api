@@ -1,3 +1,8 @@
+/**
+ * `@mastrojs/api/server` contains functions for the API server.
+ * @module
+ */
+
 // deno-lint-ignore-file no-explicit-any
 import { getParams, jsonResponse } from "@mastrojs/mastro";
 import { Err, type Result } from "@mastrojs/result";
@@ -9,22 +14,25 @@ import type { StandardSchemaV1 } from "./standard-schema.ts";
  * Constructs a JSON API route, handling request input validation and JSON serialization.
  * The returned type contains also all route information for the `fetchApi<JsonRoute>` client function.
  *
- * Example usage:
+ * Example usage: place the following into `routes/todo/[id].server.ts`
  *
  * ```ts
- * export type SearchPost = typeof POST;
- * export const POST = jsonRoute(
- *   {
- *     method: "POST",
- *     path: "/search",
- *     params: urlPathSchema,
- *     query: object({ q: optional(string) }),
- *     body: bodySchema,
- *   },
- *   async ({ body, params, query }) => {
- *     return Ok({ text: "hello world" });
- *   }
- * );
+ * import { Err, Ok } from "@mastrojs/result";
+ * import { jsonRoute } from "@mastrojs/api/server";
+ * import { boolean, object, optional, string } from "../../validate.js";
+ *
+ * export type TodoPatch = typeof PATCH;
+ * export const { PATCH } = jsonRoute({
+ *   method: "PATCH",
+ *   path: `/todo/${"id" as string}`,
+ *   params: object({ id: string }),
+ *   body: object({ done: optional(boolean), title: optional(string) }),
+ * }, async ({ body, params }) => {
+ *   const { done, title } = body;
+ *   const { id } = params;
+ *   const updatedTodo = await db.updateTodo(id, { done, title });
+ *   return updatedTodo ? Ok(updatedTodo) : Err("Not found", 404);
+ * });
  * ```
  */
 export const jsonRoute = <
@@ -38,7 +46,8 @@ export const jsonRoute = <
   opts: {
     /** HTTP method */
     method: M;
-    /** Path as a string literal (the type is used on the client) */
+    /** Path as a string literal. Its value is not used,
+     * but its type is used to verify the client. Example: `` path: `/users/${"id" as string}` `` */
     path: U;
     /** Schema for URL path parameters */
     params?: StandardSchemaV1<unknown, P>;
@@ -47,6 +56,9 @@ export const jsonRoute = <
     /** Schema for JSON request body */
     body?: StandardSchemaV1<unknown, B>;
   },
+  /**
+   * Callback that's called with the validated request parameters and should return a `Result`.
+   */
   handler: (
     context: { body: B; params: P; query: Q; req: Request },
   ) => Result<R> | Promise<Result<R>>,
